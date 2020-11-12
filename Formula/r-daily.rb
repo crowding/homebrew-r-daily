@@ -3,6 +3,11 @@ class RDaily < Formula
   homepage "https://www.r-project.org/"
   license "GPL-2.0-or-later"
   head "ftp://stat.ethz.ch/Software/R/R-devel.tar.gz"
+
+  livecheck do
+    url "https://stat.ethz.ch/R/daily/"
+    regex(%r{R-devel.tar.gz<\/a>\s*(\d+-[a-z0-9]+-\d+ *\d+:\d+)}i)
+  end
   
   option "with-debug", "build with debugging symbols"
   option "with-install-source", "install source to prefix for debugging"
@@ -23,6 +28,8 @@ class RDaily < Formula
   depends_on "tcl-tk" => :optional
   depends_on "texinfo" => :optional
   depends_on "texi2html" => :optional
+  conflicts_with "r", because: "both install `r` binaries"
+  conflicts_with cask: "r", because: "both install `r` binaries"
 
   # needed to preserve executable permissions on files without shebangs
   skip_clean "lib/R/bin", "lib/R/doc"
@@ -83,10 +90,6 @@ class RDaily < Formula
 
     if build.with? "texinfo"
       #TODO build Info manuals
-    end
-
-    if build.with? "basictex"
-      #TODO build pdf manuals
     end
 
     if build.with? "texi2html"
