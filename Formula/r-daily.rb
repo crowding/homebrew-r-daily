@@ -1,4 +1,4 @@
-class R < Formula
+class RDaily < Formula
   desc "Software environment for statistical computing"
   homepage "https://www.r-project.org/"
   license "GPL-2.0-or-later"
