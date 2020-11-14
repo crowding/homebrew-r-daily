@@ -12,6 +12,7 @@ class RDaily < Formula
   option "with-debug", "build with debugging symbols"
   option "with-install-source", "install source to prefix for debugging"
   option "without-recommended-packages", "skip building recommended packages"
+  option "without-tcl-tk", "Do not include Tcl/Tk"
   
   depends_on "pkg-config" => :build
   depends_on "gcc" # for gfortran
@@ -21,11 +22,11 @@ class RDaily < Formula
   depends_on "pcre2"
   depends_on "readline"
   depends_on "xz"
+  # depends_on "tcl-tk" => :optional
   depends_on "openblas" => :optional
   depends_on :x11 => :optional
   depends_on "cairo" => :optional
   depends_on :java => :optional
-  depends_on "tcl-tk" => :optional
   depends_on "texinfo" => :optional
   depends_on "texi2html" => :optional
   conflicts_with "r", because: "both install `r` binaries"
@@ -50,15 +51,23 @@ class RDaily < Formula
             "SED=/usr/bin/sed", # don't remember Homebrew's sed shim
            ]
 
-    if  "recommended-packages"
+    if build.with? "recommended-packages"
       args << "--without-recommended-packages"
     else
       args << "--with-recommended-packages"      
     end
 
     if build.with? "openblas"
+      #   For compilers to find openblas you may need to set:
+      #   export LDFLAGS="-L/usr/local/opt/openblas/lib"
+      # export CPPFLAGS="-I/usr/local/opt/openblas/include"
+
+      # For pkg-config to find openblas you may need to set:
+      #   export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig"
+      
       args << "--with-blas=-L#{Formula["openblas"].opt_lib} -lopenblas"
       ENV.append "LDFLAGS", "-L#{Formula["openblas"].opt_lib}"
+      ENV.append "CPPFLAGS", "#{Formula["openblas"].opt_include}/include"
     else
       args << "--with-blas=-framework Accelerate"
       ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
@@ -78,6 +87,11 @@ class RDaily < Formula
 
     if build.with? "tcl-tk"
       args << "--with-tcltk"
+      # tcl-tk is keg-only, which means it was not symlinked into /usr/local,
+      # because macOS already provides this software and installing another version in
+      # parallel can cause all kinds of trouble.
+      #      ENV.append "LDFLAGS", "-L#{Formula["tcl-tk"].opt_lib}"
+      #      ENV.append "CPPFLAGS", "#{Formula["tcl-tk"].opt_include}/include"
     else
       args << "--without-tcltk"
     end
