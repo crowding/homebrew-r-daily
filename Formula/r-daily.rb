@@ -23,12 +23,12 @@ class RDaily < Formula
   depends_on "readline"
   depends_on "xz"
   # depends_on "tcl-tk" => :optional
-  depends_on "openblas" => :optional
-  depends_on :x11 => :optional
-  depends_on "cairo" => :optional
-  depends_on :java => :optional
-  depends_on "texinfo" => :optional
-  depends_on "texi2html" => :optional
+  depends_on "openblas" => :recommended
+  depends_on :x11 => :recommended
+  depends_on "cairo" => :recommended
+  depends_on :java => :recommended
+  depends_on "texinfo" => :recommennded
+  depends_on "texi2html" => :recommended
   conflicts_with "r", because: "both install `r` binaries"
   conflicts_with cask: "r", because: "both install `r` binaries"
 
@@ -67,7 +67,7 @@ class RDaily < Formula
       
       args << "--with-blas=-L#{Formula["openblas"].opt_lib} -lopenblas"
       ENV.append "LDFLAGS", "-L#{Formula["openblas"].opt_lib}"
-      ENV.append "CPPFLAGS", "#{Formula["openblas"].opt_include}/include"
+      ENV.append "CPPFLAGS", "-I#{Formula["openblas"].opt_include}"
     else
       args << "--with-blas=-framework Accelerate"
       ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
@@ -91,7 +91,7 @@ class RDaily < Formula
       # because macOS already provides this software and installing another version in
       # parallel can cause all kinds of trouble.
       #      ENV.append "LDFLAGS", "-L#{Formula["tcl-tk"].opt_lib}"
-      #      ENV.append "CPPFLAGS", "#{Formula["tcl-tk"].opt_include}/include"
+      #      ENV.append "CPPFLAGS", "-I#{Formula["tcl-tk"].opt_include}"
     else
       args << "--without-tcltk"
     end
