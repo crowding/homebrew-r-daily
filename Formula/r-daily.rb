@@ -26,7 +26,7 @@ class RDaily < Formula
   depends_on "openblas" => :recommended
   depends_on "libx11" => :recommended
   depends_on "cairo" => :recommended
-  depends_on :java => :recommended
+  depends_on "openjdk@11" => :recommended
   depends_on "texinfo" => :recommennded
   depends_on "texi2html" => :recommended
   conflicts_with "r", because: "both install `r` binaries"
@@ -73,10 +73,10 @@ class RDaily < Formula
       ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
     end
 
-    if build.with? "x11"
+    if build.with? "x"
       args << "--with-x"
     else
-      args << 
+      args << "--without-x"
     end
 
     if build.with? "cairo"
