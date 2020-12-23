@@ -1,16 +1,14 @@
 # R daily
 
-This is a [Homebrew][] tap which will build and install [R][] from the daily development branch snapshot.
+This is a [Homebrew][homebrew] tap which will build and install [R][e]
+from the daily development branch snapshot.
 [homebrew]: https://brew.sh/
 [r]: https://www.r-project.org/
 
     brew tap crowding/r-daily
-    brew install crowding/r-daily/r-daily --HEAD
+    brew install --HEAD crowding/r-daily/r-daily
 
-    brew install crowding/r-daily/r-daily \
-        --HEAD \
-        --with-recommended-packages --with-debug --with-install-source \ 
-        --with-cairo --with-openjdk@11 --with-openblas --with-libx11 \
-        --with-texinfo --with-texi2html
+By default this will install an R with all bells and whistles enabled. For a
+list of options type:
 
-    brew install crowding/r-daily/r-daily --HEAD --with-cairo --with-java --with-openblas --with-x --with-recommended-packages --with-debug --with-install-source --with-texinfo --with-texi2html
+    brew info crowding/r-daily/r-daily

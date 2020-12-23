@@ -1,3 +1,24 @@
+class TexRequirement < Requirement
+  extend T::Sig
+  cask "mactex"
+  fatal true
+
+  satisfy(:build_env => false) { which("pdflatex") && which("pdftex") && which("tex") }
+
+  sig { returns(String) }
+  def display_s
+    "pdflatex"
+  end
+
+  def message; <<~EOS
+    Binaries 'pdflatex', 'pdftex' and 'tex' are required; install them via one of:
+      brew install --cask mactex
+      brew install --cask mactex-no-gui
+    Or whatever your preferred TeX distribution is.
+    EOS
+  end
+end
+
 class RDaily < Formula
   desc "Software environment for statistical computing"
   homepage "https://www.r-project.org/"
@@ -9,10 +30,11 @@ class RDaily < Formula
     regex(%r{R-devel.tar.gz<\/a>\s*(\d+-[a-z0-9]+-\d+ *\d+:\d+)}i)
   end
   
-  option "with-debug", "build with debugging symbols"
-  option "with-install-source", "install source to prefix for debugging"
+  option "without-debug", "build without debugging symbols"
+  #option "without-install-source", "install source to prefix for debugging"
   option "without-recommended-packages", "skip building recommended packages"
   option "without-tcl-tk", "Do not include Tcl/Tk"
+  option "without-manuals", "Skip building pdf/info manuals"
   
   depends_on "pkg-config" => :build
   depends_on "gcc" # for gfortran
@@ -22,12 +44,14 @@ class RDaily < Formula
   depends_on "pcre2"
   depends_on "readline"
   depends_on "xz"
+  depends_on TexRequirement
+  depends_on "texinfo"
+  depends_on "texi2html"
   depends_on "openblas" => :recommended
-  depends_on cask: "xquartz" => :recommended
+  depends_on "libxt" => :recommended
   depends_on "cairo" => :recommended
   depends_on "openjdk@11" => :recommended
-  depends_on "texinfo" => :recommennded
-  depends_on "texi2html" => :recommended
+  depends_on "openmotif" => :recommended
   conflicts_with "r", because: "both install `r` binaries"
   conflicts_with cask: "r", because: "both install `r` binaries"
 
@@ -51,9 +75,9 @@ class RDaily < Formula
            ]
 
     if build.with? "recommended-packages"
-      args << "--without-recommended-packages"
+      args << "--with-recommended-packages"
     else
-      args << "--with-recommended-packages"      
+      args << "--without-recommended-packages"      
     end
 
     if build.with? "openblas"
@@ -72,8 +96,12 @@ class RDaily < Formula
       ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
     end
 
-    if build.with? "xquartz"
+    if build.with? "libxt"
       args << "--with-x"
+      ENV.append "LDFLAGS", "-L#{Formula["libxt"].opt_lib}/"
+      ENV.append "CPPFLAGS", "-I#{Formula["libxt"].opt_include}"
+      ENV.append "LDFLAGS", "-L#{Formula["libx11"].opt_lib}/"
+      ENV.append "CPPFLAGS", "-I#{Formula["libx11"].opt_include}"
     else
       args << "--without-x"
     end
@@ -100,14 +128,6 @@ class RDaily < Formula
     else
       args << "--disable-java"
     end
-
-    if build.with? "texinfo"
-      #TODO build Info manuals
-    end
-
-    if build.with? "texi2html"
-      #TODO build html manuals
-    end
     
     if build.with? "debug"
       ENV.append "CFLAGS", "-g -fPIC"
@@ -122,8 +142,19 @@ class RDaily < Formula
       ENV.append "LDFLAGS", "-L#{Formula[f].opt_lib}"
     end
 
+    ENV["PDFLATEX"] = which("pdflatex")
+    ENV["PDFTEX"] = which("pdftex")
+    ENV["TEX"] = which("tex")
+    
     system "./configure", *args
-    system "make -j$(nproc)"
+
+    system "make"
+
+    if build.with? "manuals"
+      system "make", "info"
+      system "make", "pdf"
+    end
+
     ENV.deparallelize do
       system "make", "install"
     end
@@ -135,11 +166,17 @@ class RDaily < Formula
       end
     end
 
+    if build.with? "manuals"
+      system "make", "install-info"
+      system "make", "install-pdf"
+    end
+
     r_home = lib/"R"
 
-    if build.with? "install-source"
-      #TODO
-    end
+    # if build.with? "install-source"
+    #   raise "debug"
+    #   #TODO
+    # end
     
     # make Homebrew packages discoverable for R CMD INSTALL
     inreplace r_home/"etc/Makeconf" do |s|
