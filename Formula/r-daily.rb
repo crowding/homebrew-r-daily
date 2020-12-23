@@ -22,9 +22,8 @@ class RDaily < Formula
   depends_on "pcre2"
   depends_on "readline"
   depends_on "xz"
-  # depends_on "tcl-tk" => :optional
   depends_on "openblas" => :recommended
-  depends_on "libx11" => :recommended
+  depends_on "xquartz" => :recommended
   depends_on "cairo" => :recommended
   depends_on "openjdk@11" => :recommended
   depends_on "texinfo" => :recommennded
@@ -73,7 +72,7 @@ class RDaily < Formula
       ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
     end
 
-    if build.with? "x"
+    if build.with? "xquartz"
       args << "--with-x"
     else
       args << "--without-x"
@@ -96,7 +95,7 @@ class RDaily < Formula
       args << "--without-tcltk"
     end
 
-    if build.with? "java"
+    if build.with? "openjdk@11"
       args << "--enable-java"
     else
       args << "--disable-java"
