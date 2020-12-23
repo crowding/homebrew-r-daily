@@ -24,7 +24,7 @@ class RDaily < Formula
   depends_on "xz"
   # depends_on "tcl-tk" => :optional
   depends_on "openblas" => :recommended
-  depends_on :x11 => :recommended
+  depends_on "libx11" => :recommended
   depends_on "cairo" => :recommended
   depends_on :java => :recommended
   depends_on "texinfo" => :recommennded
@@ -76,7 +76,7 @@ class RDaily < Formula
     if build.with? "x11"
       args << "--with-x"
     else
-      args << "--without-x"
+      args << 
     end
 
     if build.with? "cairo"
@@ -124,7 +124,7 @@ class RDaily < Formula
     end
 
     system "./configure", *args
-    system "make"
+    system "make -j$(nproc)"
     ENV.deparallelize do
       system "make", "install"
     end
