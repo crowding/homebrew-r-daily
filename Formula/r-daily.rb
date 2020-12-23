@@ -23,7 +23,7 @@ class RDaily < Formula
   depends_on "readline"
   depends_on "xz"
   depends_on "openblas" => :recommended
-  depends_on "xquartz" => :recommended
+  depends_on cask: "xquartz" => :recommended
   depends_on "cairo" => :recommended
   depends_on "openjdk@11" => :recommended
   depends_on "texinfo" => :recommennded
